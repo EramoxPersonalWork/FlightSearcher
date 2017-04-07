@@ -17,6 +17,7 @@ from lxml import etree
 from io import StringIO
 import sys
 import getopt
+import argparse
 
 class SkyscannerAPI(object):
 	'Class to handle requests to Skyscanner REST API'
@@ -31,6 +32,7 @@ class SkyscannerAPI(object):
 #		print("Database version : %s " % data)
 		self.apikey = apiKey
 		print(__name__ + " constructed")
+		print("api key is " + self.apikey)
 
 	def __del__(self):
 		#print("Closing DB")
@@ -171,7 +173,7 @@ class TravelApiLive(SkyscannerAPI):
 class TravelApiCached(SkyscannerAPI):
 
 	def __init__(self, apiKey):
-		super(TravelApiCached, self).__init__(apiKey)
+		super().__init__(apiKey)
 
 	def buildServiceParameter(self, coun, cur, loc, ori, dest, dateOut, dateIn):
 		serviceParameter = {
@@ -202,7 +204,7 @@ class TravelApiCached(SkyscannerAPI):
 		}
 		h = Http()
 		serviceUrl = self._buildUrlFromServiceParam(paramService)
-		dataUrl = self.endpoint + "browse" + service + "/v1.0/" + serviceUrl + "?apikey=" + self.apiKey
+		dataUrl = self.endpoint + "browse" + service + "/v1.0/" + serviceUrl + "?apikey=" + self.apikey
 #		print("Poling " + dataUrl)
 		resp, content = h.request(dataUrl, "GET")
 #		print("Content:", content)
@@ -222,21 +224,20 @@ class TravelApiCached(SkyscannerAPI):
 	def browseDatesGrid(self, paramService):
 		self._browseService("grid", paramService)
 
+
+parser = argparse.ArgumentParser(description='Find a flight sing Skyscanner API')
+parser.add_argument('--key', help='Skyscanner API key', required=True)
+
 def main(argv=None):
 	if argv is None:
 		argv = sys.argv
 
-	try:
-		opts, args = getopt.getopt(argv[1:], "hk:", ["help", "key="])
-        # more code, unchanged
-	except getopt.GetoptError as err:
-		print(err.msg, file=sys.stderr)
-		print("for help use --help", file=sys.stderr)
-		return 1
+	args = vars(parser.parse_args())
+	print("Parsed: " + str(args))
 
 #	tal = TravelApiLive()
 #	tal.create_session()
-	tac = TravelApiCached()
+	tac = TravelApiCached(args["key"])
 	param = tac.buildServiceParameter("UK", "GBP", "en-GB", "EDI", "LHR", "2017-05-30", "2017-06-02")
 	print("param: " + str(param))
 	print("browsing quotes")
