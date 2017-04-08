@@ -31,8 +31,6 @@ class SkyscannerAPI(object):
 #		data = cursor.fetchone()
 #		print("Database version : %s " % data)
 		self.apikey = apiKey
-		print(__name__ + " constructed")
-		print("api key is " + self.apikey)
 
 	def __del__(self):
 		#print("Closing DB")
@@ -207,22 +205,23 @@ class TravelApiCached(SkyscannerAPI):
 		dataUrl = self.endpoint + "browse" + service + "/v1.0/" + serviceUrl + "?apikey=" + self.apikey
 #		print("Poling " + dataUrl)
 		resp, content = h.request(dataUrl, "GET")
-#		print("Content:", content)
 		print("Resp:", self.str_resp(resp))
+		print("Content:\n", content)
+		print("Resp:\n", resp)
 
 		return content;
 
 	def browseQuotes(self, paramService):
-		self._browseService("quotes", paramService)
+		return self._browseService("quotes", paramService)
 
 	def browseRoutes(self, paramService):
-		self._browseService("routes", paramService)
+		return self._browseService("routes", paramService)
 
 	def browseDates(self, paramService):
-		self._browseService("dates", paramService)
+		return self._browseService("dates", paramService)
 
 	def browseDatesGrid(self, paramService):
-		self._browseService("grid", paramService)
+		return self._browseService("grid", paramService)
 
 
 parser = argparse.ArgumentParser(description='Find a flight sing Skyscanner API')
@@ -233,21 +232,21 @@ def main(argv=None):
 		argv = sys.argv
 
 	args = vars(parser.parse_args())
-	print("Parsed: " + str(args))
 
 #	tal = TravelApiLive()
 #	tal.create_session()
 	tac = TravelApiCached(args["key"])
 	param = tac.buildServiceParameter("UK", "GBP", "en-GB", "EDI", "LHR", "2017-05-30", "2017-06-02")
-	print("param: " + str(param))
-	print("browsing quotes")
-	tac.browseQuotes(param)
-	print("browsing routes")
-	tac.browseRoutes(param)
-	print("browsing dates")
-	tac.browseDates(param)
-	print("browsing dates as grid")
-	tac.browseDatesGrid(param)
+#	print("param: " + str(param))
+#	print("browsing quotes")
+#	tac.browseQuotes(param)
+#	print("browsing routes")
+#	tac.browseRoutes(param)
+#	print("browsing dates")
+#	tac.browseDates(param)
+#	print("browsing dates as grid")
+	res = tac.browseDatesGrid(param)
+	print("res: " + res)
 
 	return 0
 
